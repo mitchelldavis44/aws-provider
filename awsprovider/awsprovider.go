@@ -28,7 +28,7 @@ func (a *AWSProvider) CreateResource(name string) error {
 	// Use a.svc to create an EC2 instance, S3 bucket, etc.
 	// This is just a simplified example and won't actually work.
 	_, err := a.svc.RunInstances(&ec2.RunInstancesInput{
-		ImageId:      aws.String("ami-abc12345"),
+		ImageId:      aws.String("ami-0d52ddcdf3a885741"),
 		InstanceType: aws.String("t2.micro"),
 		MinCount:     aws.Int64(1),
 		MaxCount:     aws.Int64(1),
