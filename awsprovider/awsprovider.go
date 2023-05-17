@@ -51,21 +51,6 @@ func (a *AWSProvider) CreateResource(name string, instanceType string, imageID s
             Name: aws.String("your-iam-instance-profile-name"),
         },
     })
-
-	_, err := a.svc.RunInstances(&ec2.RunInstancesInput{
-    	ImageId:      aws.String(imageID), // Use ImageID from arguments
-    	InstanceType: aws.String(instanceType), // Use InstanceType from arguments
-    	MinCount:     aws.Int64(1),
-    	MaxCount:     aws.Int64(1),
-		KeyName:      aws.String("your-key-pair-name"),
-		SecurityGroupIds: []*string{
-			aws.String("your-security-group-id"),
-		},
-		SubnetId: aws.String("your-subnet-id"),
-		IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
-			Name: aws.String("your-iam-instance-profile-name"),
-		},
-	})
 	if err != nil {
 		return err
 	}
