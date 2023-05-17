@@ -14,7 +14,7 @@ type AWSProvider struct {
 
 func NewAWSProvider() infrastructure.Infrastructure {
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String("us-west-2"),
+		Region: aws.String("us-east-1"),
 	}))
 
 	svc := ec2.New(sess)
