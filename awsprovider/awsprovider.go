@@ -24,14 +24,21 @@ func NewAWSProvider() infrastructure.Infrastructure {
 	}
 }
 
-func (a *AWSProvider) CreateResource(name string) error {
-	// Use a.svc to create an EC2 instance, S3 bucket, etc.
-	// This is just a simplified example and won't actually work.
+// Modify the CreateResource function to accept InstanceType and ImageID
+func (a *AWSProvider) CreateResource(name string, instanceType string, imageID string) error {
 	_, err := a.svc.RunInstances(&ec2.RunInstancesInput{
-		ImageId:      aws.String("ami-0889a44b331db0194"),
-		InstanceType: aws.String("t2.micro"),
+		ImageId:      aws.String(imageID), // Use ImageID from arguments
+		InstanceType: aws.String(instanceType), // Use InstanceType from arguments
 		MinCount:     aws.Int64(1),
 		MaxCount:     aws.Int64(1),
+		KeyName:      aws.String("your-key-pair-name"),
+		SecurityGroupIds: []*string{
+			aws.String("your-security-group-id"),
+		},
+		SubnetId: aws.String("your-subnet-id"),
+		IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
+			Name: aws.String("your-iam-instance-profile-name"),
+		},
 	})
 	if err != nil {
 		return err
@@ -41,8 +48,6 @@ func (a *AWSProvider) CreateResource(name string) error {
 }
 
 func (a *AWSProvider) DeleteResource(name string) error {
-	// Use a.svc to delete an EC2 instance, S3 bucket, etc.
-	// This is just a simplified example and won't actually work.
 	_, err := a.svc.TerminateInstances(&ec2.TerminateInstancesInput{
 		InstanceIds: []*string{aws.String(name)},
 	})
