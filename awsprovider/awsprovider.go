@@ -25,10 +25,10 @@ func NewAWSProvider() infrastructure.Infrastructure {
 }
 
 // Modify the CreateResource function to accept InstanceType and ImageID
-func (a *AWSProvider) CreateResource(name string, instanceType string, imageID string) error {
+func (a *AWSProvider) CreateResource(name string, instanceType string, imageID string, securityGroupName string, keyPairName string, subnetId string, iamInstanceProfile string) error {
     sgInput := &ec2.DescribeSecurityGroupsInput{
         GroupNames: []*string{
-            aws.String("your-security-group-name"),
+            aws.String(securityGroupName),
         },
     }
     sgResult, err := a.svc.DescribeSecurityGroups(sgInput)
@@ -42,13 +42,13 @@ func (a *AWSProvider) CreateResource(name string, instanceType string, imageID s
         InstanceType: aws.String(instanceType),
         MinCount:     aws.Int64(1),
         MaxCount:     aws.Int64(1),
-        KeyName:      aws.String("your-key-pair-name"),
+        KeyName:      aws.String(keyPairName),
         SecurityGroupIds: []*string{
-            sgId, // Use the security group ID retrieved above
+            sgId,
         },
-        SubnetId: aws.String("your-subnet-id"),
+        SubnetId: aws.String(subnetId),
         IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
-            Name: aws.String("your-iam-instance-profile-name"),
+            Name: aws.String(iamInstanceProfile),
         },
     })
 	if err != nil {
