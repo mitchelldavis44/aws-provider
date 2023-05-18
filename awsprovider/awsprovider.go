@@ -51,11 +51,11 @@ func (a *AWSProvider) CreateResource(name string, instanceType string, imageID s
             Name: aws.String(iamInstanceProfile),
         },
     })
-	if err != nil {
-		return err
-	}
+    if err != nil {
+        return err
+    }
 
-	return nil
+    return nil
 }
 
 func (a *AWSProvider) DeleteResource(name string) error {
