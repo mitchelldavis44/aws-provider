@@ -25,7 +25,8 @@ func NewAWSProvider() infrastructure.Infrastructure {
 }
 
 // Modify the CreateResource function to accept InstanceType and ImageID
-func (a *AWSProvider) CreateResource(name string, instanceType string, imageID string, securityGroupId string, keyPairName string, subnetId string, iamInstanceProfile string, vpcId string) error {
+func (a *AWSProvider) CreateResource(name string, instanceType string, imageID string, securityGroupId string, keyPairName string, subnetId string, iamInstanceProfile string, vpcId string) (string, error) {
+    runResult, err := a.svc.RunInstances(&ec2.RunInstancesInput{
     _, err := a.svc.RunInstances(&ec2.RunInstancesInput{
         ImageId:      aws.String(imageID),
         InstanceType: aws.String(instanceType),
@@ -48,7 +49,7 @@ func (a *AWSProvider) CreateResource(name string, instanceType string, imageID s
         return err
     }
 
-    return nil
+    return *runResult.Instances[0].InstanceId, nil
 }
 
 func (a *AWSProvider) DeleteResource(name string) error {
