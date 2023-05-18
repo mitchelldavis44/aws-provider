@@ -32,16 +32,15 @@ func (a *AWSProvider) CreateResource(name string, instanceType string, imageID s
         MinCount:     aws.Int64(1),
         MaxCount:     aws.Int64(1),
         KeyName:      aws.String(keyPairName),
-        SubnetId: aws.String(subnetId),
         IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
             Name: aws.String(iamInstanceProfile),
         },
         NetworkInterfaces: []*ec2.InstanceNetworkInterfaceSpecification{
             {
-              DeviceIndex:              aws.Int64(0),
-              SubnetId:                 aws.String(subnetId),
-              Groups:                   []*string{aws.String(securityGroupId)},
-              AssociatePublicIpAddress: aws.Bool(true),
+                DeviceIndex:              aws.Int64(0),
+                SubnetId:                 aws.String(subnetId),
+                Groups:                   []*string{aws.String(securityGroupId)},
+                AssociatePublicIpAddress: aws.Bool(true),
             },
         },
     })
