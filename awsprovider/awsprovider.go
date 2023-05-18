@@ -25,35 +25,35 @@ func NewAWSProvider() infrastructure.Infrastructure {
 }
 
 // Modify the CreateResource function to accept InstanceType and ImageID
-func (a *AWSProvider) CreateResource(name string, instanceType string, imageID string, securityGroupName string, keyPairName string, subnetId string, iamInstanceProfile string) error {
-    sgInput := &ec2.DescribeSecurityGroupsInput{
-        GroupNames: []*string{
-            aws.String(securityGroupName),
-        },
-    }
-    sgResult, err := a.svc.DescribeSecurityGroups(sgInput)
-    if err != nil {
-        return err
-    }
-    sgId := sgResult.SecurityGroups[0].GroupId
+func (a *AWSProvider) CreateResource(name string, instanceType string, imageID string, securityGroupId string, keyPairName string, subnetId string, iamInstanceProfile string, vpcId string) error {
+    sgId := aws.String(securityGroupName)
 
     _, err = a.svc.RunInstances(&ec2.RunInstancesInput{
-        ImageId:      aws.String(imageID),
-        InstanceType: aws.String(instanceType),
-        MinCount:     aws.Int64(1),
-        MaxCount:     aws.Int64(1),
-        KeyName:      aws.String(keyPairName),
-        SecurityGroupIds: []*string{
-            sgId,
-        },
-        SubnetId: aws.String(subnetId),
-        IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
-            Name: aws.String(iamInstanceProfile),
-        },
-    })
-    if err != nil {
-        return err
-    }
+          ImageId:      aws.String(imageID),
+          InstanceType: aws.String(instanceType),
+          MinCount:     aws.Int64(1),
+          MaxCount:     aws.Int64(1),
+          KeyName:      aws.String(keyPairName),
+          SecurityGroupIds: []*string{
+              sgId,
+          },
+          SubnetId: aws.String(subnetId),
+          IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
+              Name: aws.String(iamInstanceProfile),
+          },
+          // Add this line:
+          NetworkInterfaces: []*ec2.InstanceNetworkInterfaceSpecification{
+            {
+              DeviceIndex:              aws.Int64(0),
+              SubnetId:                 aws.String(subnetId),
+              Groups:                   []*string{sgId},
+              AssociatePublicIpAddress: aws.Bool(true),
+            },
+          },
+      })
+        if err != nil {
+            return err
+        }
 
     return nil
 }
