@@ -49,7 +49,7 @@ func (a *AWSProvider) CreateResource(name string, instanceType string, imageID s
         return err
     }
 
-    return *runResult.Instances[0].InstanceId, nil
+     return *runResult.Instances[0].InstanceId, nil
 }
 
 func (a *AWSProvider) DeleteResource(name string) error {
