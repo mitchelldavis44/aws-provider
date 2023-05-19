@@ -2,6 +2,8 @@
 package awsprovider
 
 import (
+    "time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -48,7 +50,33 @@ func (a *AWSProvider) CreateResource(name string, instanceType string, imageID s
         return "", err
     }
 
-     return *runResult.Instances[0].InstanceId, nil
+    instanceID := runResult.Instances[0].InstanceId
+
+    // Now we keep checking the instance status until it's running or maximum wait time has been reached
+    maxRetries := 40 // you can change this number based on your requirement
+    for i := 0; i < maxRetries; i++ {
+        input := &ec2.DescribeInstancesInput{
+            InstanceIds: []*string{instanceID},
+        }
+        result, err := a.svc.DescribeInstances(input)
+        if err != nil {
+            return "", err
+        }
+
+        if len(result.Reservations) > 0 && len(result.Reservations[0].Instances) > 0 {
+            instanceState := result.Reservations[0].Instances[0].State.Name
+            if *instanceState == "running" {
+                fmt.Printf("Instance is up and running.\n")
+                return *instanceID, nil
+            } else {
+                fmt.Printf("Current state of instance is: %s\n", *instanceState)
+            }
+        }
+
+        time.Sleep(time.Duration(15) * time.Second) // wait for 15 seconds before checking status again
+    }
+
+    return "", fmt.Errorf("Failed to create instance: Exceeded max wait time of %d seconds", maxRetries*15)
 }
 
 func (a *AWSProvider) DeleteResource(name string) error {
