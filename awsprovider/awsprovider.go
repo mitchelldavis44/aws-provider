@@ -2,6 +2,7 @@
 package awsprovider
 
 import (
+    "fmt"
     "time"
 
 	"github.com/aws/aws-sdk-go/aws"
