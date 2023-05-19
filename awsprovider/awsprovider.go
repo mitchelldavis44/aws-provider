@@ -27,8 +27,18 @@ func NewAWSProvider() infrastructure.Infrastructure {
     }
 }
 
-// Modify the CreateResource function to accept InstanceType and ImageID
-func (a *AWSProvider) CreateResource(name string, instanceType string, imageID string, securityGroupId string, keyPairName string, subnetId string, iamInstanceProfile string, vpcId string) (string, error) {
+// Modify the CreateResource function to accept InstanceType, ImageID and Tags
+func (a *AWSProvider) CreateResource(name string, instanceType string, imageID string, securityGroupId string, keyPairName string, subnetId string, iamInstanceProfile string, vpcId string, tags map[string]string) (string, error) {
+    // Convert the tags to the correct format
+    awsTags := []*ec2.Tag{}
+    for key, value := range tags {
+        awsTags = append(awsTags, &ec2.Tag{
+            Key:   aws.String(key),
+            Value: aws.String(value),
+        })
+    }
+
+    // Add tags to the RunInstancesInput
     runResult, err := a.svc.RunInstances(&ec2.RunInstancesInput{
         ImageId:      aws.String(imageID),
         InstanceType: aws.String(instanceType),
@@ -44,6 +54,12 @@ func (a *AWSProvider) CreateResource(name string, instanceType string, imageID s
                 SubnetId:                 aws.String(subnetId),
                 Groups:                   []*string{aws.String(securityGroupId)},
                 AssociatePublicIpAddress: aws.Bool(true),
+            },
+        },
+        TagSpecifications: []*ec2.TagSpecification{
+            {
+                ResourceType: aws.String("instance"),
+                Tags:         awsTags,
             },
         },
     })
