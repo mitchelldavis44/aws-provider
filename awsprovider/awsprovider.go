@@ -5,26 +5,26 @@ import (
     "fmt"
     "time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/mitchelldavis44/Harmony/pkg/infrastructure"
+    "github.com/aws/aws-sdk-go/aws"
+    "github.com/aws/aws-sdk-go/aws/session"
+    "github.com/aws/aws-sdk-go/service/ec2"
+    "github.com/mitchelldavis44/Harmony/pkg/infrastructure"
 )
 
 type AWSProvider struct {
-	svc *ec2.EC2
+    svc *ec2.EC2
 }
 
 func NewAWSProvider() infrastructure.Infrastructure {
-	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1"),
-	}))
+    sess := session.Must(session.NewSession(&aws.Config{
+        Region: aws.String("us-east-1"),
+    }))
 
-	svc := ec2.New(sess)
+    svc := ec2.New(sess)
 
-	return &AWSProvider{
-		svc: svc,
-	}
+    return &AWSProvider{
+        svc: svc,
+    }
 }
 
 // Modify the CreateResource function to accept InstanceType and ImageID
@@ -52,10 +52,14 @@ func (a *AWSProvider) CreateResource(name string, instanceType string, imageID s
     }
 
     instanceID := runResult.Instances[0].InstanceId
+    fmt.Printf("Instance is launching, ID: %s\n", *instanceID)
 
     // Now we keep checking the instance status until it's running or maximum wait time has been reached
     maxRetries := 40 // you can change this number based on your requirement
     for i := 0; i < maxRetries; i++ {
+        // Wait for 15 seconds before checking status again
+        time.Sleep(time.Duration(15) * time.Second)
+
         input := &ec2.DescribeInstancesInput{
             InstanceIds: []*string{instanceID},
         }
@@ -73,20 +77,18 @@ func (a *AWSProvider) CreateResource(name string, instanceType string, imageID s
                 fmt.Printf("Current state of instance is: %s\n", *instanceState)
             }
         }
-
-        time.Sleep(time.Duration(15) * time.Second) // wait for 15 seconds before checking status again
     }
 
     return "", fmt.Errorf("Failed to create instance: Exceeded max wait time of %d seconds", maxRetries*15)
 }
 
 func (a *AWSProvider) DeleteResource(name string) error {
-	_, err := a.svc.TerminateInstances(&ec2.TerminateInstancesInput{
-		InstanceIds: []*string{aws.String(name)},
-	})
-	if err != nil {
-		return err
-	}
+    _, err := a.svc.TerminateInstances(&ec2.TerminateInstancesInput{
+        InstanceIds: []*string{aws.String(name)},
+    })
+    if err != nil {
+        return err
+    }
 
-	return nil
+    return nil
 }
